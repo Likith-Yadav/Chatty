@@ -1,13 +1,10 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://chatty-backend.vercel.app';
-
-const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+export const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_BACKEND_URL || 
+           (import.meta.env.MODE === "development" ? "http://localhost:5001/api" : "/api"),
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  timeout: 10000, // 10 seconds timeout
 });
 
 // Add a request interceptor for logging
@@ -44,5 +41,3 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-export default axiosInstance;
