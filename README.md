@@ -1,42 +1,76 @@
-# ✨ Full Stack Realtime Chat App ✨
+# Chatty 💬
 
-![Demo App](/frontend/public/screenshot-for-readme.png)
+## Overview
+Chatty is a modern, full-stack real-time chat application built with cutting-edge web technologies. It provides seamless messaging, group chats, and a beautiful user experience.
 
-[Video Tutorial on Youtube](https://youtu.be/ntKkVrQqBYY)
+## 🚀 Features
+- Real-time messaging using WebSocket
+- End-to-end encryption
+- Group and personal chat rooms
+- Responsive design
+- Dark/Light theme support
+- User authentication
+- Profile management
 
-Highlights:
+## 🛠 Tech Stack
+### Frontend
+- React.js
+- Vite
+- Tailwind CSS
+- Zustand (State Management)
+- React Router
+- Socket.io-client
 
-- 🌟 Tech stack: MERN + Socket.io + TailwindCSS + Daisy UI
-- 🎃 Authentication && Authorization with JWT
-- 👾 Real-time messaging with Socket.io
-- 🚀 Online user status
-- 👌 Global state management with Zustand
-- 🐞 Error handling both on the server and on the client
-- ⭐ At the end Deployment like a pro for FREE!
-- ⏳ And much more!
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- Socket.io
+- JWT Authentication
 
-### Setup .env file
+## 📦 Prerequisites
+- Node.js (v18+)
+- npm or yarn
+- MongoDB
 
-```js
-MONGODB_URI=...
-PORT=5001
-JWT_SECRET=...
+## 🔧 Installation
 
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
-
-NODE_ENV=development
+### Clone the Repository
+```bash
+git clone https://github.com/Likith-Yadav/Chatty.git
+cd Chatty
 ```
 
-### Build the app
-
-```shell
-npm run build
+### Backend Setup
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Configure your .env file
+npm run dev
 ```
 
-### Start the app
-
-```shell
-npm start
+### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
 ```
+
+## 🌟 Contributing
+Contributions are welcome! Please read the contributing guidelines before getting started.
+
+## 📄 License
+This project is licensed under the MIT License.
+
+## 👤 Author
+**Likith Yadav**
+- GitHub: [@Likith-Yadav](https://github.com/Likith-Yadav)
+- LinkedIn: [Likith Yadav](https://www.linkedin.com/in/likith-yadav)
+
+## 🎉 Acknowledgements
+- React Community
+- Socket.io
+- Tailwind CSS
+- MongoDB
