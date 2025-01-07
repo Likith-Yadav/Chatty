@@ -106,27 +106,77 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ error: "Invalid credentials" });
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false,
+        error: "Email and password are required" 
+      });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        success: false,
+        error: "Invalid email format" 
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+    if (!user) {
+      return res.status(401).json({ 
+        success: false,
+        error: "Invalid credentials" 
+      });
+    }
+
+    // Compare passwords
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      return res.status(401).json({ 
+        success: false,
+        error: "Invalid credentials" 
+      });
     }
 
+    // Generate token
     generateToken(user._id, res);
 
-    res.status(200).json({
+    // Prepare user response
+    const userResponse = {
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
-      profilePic: user.profilePic,
-    });
+      profilePic: user.profilePic || '',
+      success: true
+    };
+
+    // Send successful response
+    res.status(200).json(userResponse);
   } catch (error) {
-    console.error("Error in login controller:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error in login controller:", {
+      message: error.message,
+      stack: error.stack,
+      body: req.body
+    });
+
+    // Differentiate error responses
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        success: false,
+        error: "Validation failed",
+        details: error.errors 
+      });
+    }
+
+    // Generic server error
+    res.status(500).json({ 
+      success: false,
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? error.message : null
+    });
   }
 };
 

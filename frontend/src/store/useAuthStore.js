@@ -143,7 +143,7 @@ export const useAuthStore = create((set, get) => ({
       });
       
       // Successful login handling
-      if (res.status === 200) {
+      if (res.data && res.data.success) {
         // Store user info in localStorage for persistent cross-tab state
         localStorage.setItem('userInfo', JSON.stringify(res.data));
         
@@ -159,14 +159,14 @@ export const useAuthStore = create((set, get) => ({
         // Connect socket after successful login
         get().connectSocket();
         
-        toast.success("Logged in successfully");
+        toast.success(`Welcome back, ${res.data.fullName}!`);
         
         return res.data;
       } else {
         // Unexpected successful response
         console.warn('Unexpected login response:', res);
-        toast.error('Unexpected login response');
-        throw new Error('Unexpected login response');
+        toast.error(res.data.error || 'Unexpected login response');
+        throw new Error(res.data.error || 'Unexpected login response');
       }
     } catch (error) {
       // Reset loading state
@@ -183,9 +183,8 @@ export const useAuthStore = create((set, get) => ({
       // More specific error messages
       if (error.response) {
         // The request was made and the server responded with a status code
-        const errorMessage = error.response.data.details || 
-                             error.response.data.message || 
-                             'Login failed';
+        const errorData = error.response.data;
+        const errorMessage = errorData.error || errorData.message || 'Login failed';
         
         switch (error.response.status) {
           case 400:
@@ -196,7 +195,8 @@ export const useAuthStore = create((set, get) => ({
             break;
           case 500:
             // Suppress generic internal server error
-            console.warn('Server error details:', error.response.data);
+            console.warn('Server error details:', errorData);
+            toast.error('Server error. Please try again later.');
             break;
           default:
             toast.error(errorMessage);

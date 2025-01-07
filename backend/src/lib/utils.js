@@ -26,10 +26,11 @@ export const generateToken = (userId, res) => {
     res.cookie("jwt", token, {
       maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days in milliseconds
       httpOnly: true, // Prevent client-side JS access
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', 
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'None', // Required for cross-site cookies
+      secure: true, // HTTPS only
       path: '/', // Accessible across entire domain
-      domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
+      // Explicitly set domain for Render deployment
+      domain: process.env.COOKIE_DOMAIN || undefined
     });
 
     return token;
@@ -48,9 +49,10 @@ export const regenerateToken = (userId, res) => {
     // Remove existing token
     res.clearCookie('jwt', {
       httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      path: '/'
+      sameSite: 'None',
+      secure: true,
+      path: '/',
+      domain: process.env.COOKIE_DOMAIN || undefined
     });
 
     // Generate and set new token
@@ -69,8 +71,9 @@ export const invalidateToken = (res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
     expires: new Date(0), // Expire immediately
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/'
+    sameSite: 'None',
+    secure: true,
+    path: '/',
+    domain: process.env.COOKIE_DOMAIN || undefined
   });
 };
