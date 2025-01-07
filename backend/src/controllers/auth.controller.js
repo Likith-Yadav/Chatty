@@ -7,13 +7,42 @@ export const signup = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
+    // Validate input fields
     if (!fullName || !email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ 
+        success: false,
+        error: "All fields are required",
+        details: {
+          fullName: !!fullName,
+          email: !!email,
+          password: !!password
+        }
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        success: false,
+        error: "Invalid email format" 
+      });
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      return res.status(400).json({ 
+        success: false,
+        error: "Password must be at least 8 characters long" 
+      });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: "Email already exists" });
+      return res.status(400).json({ 
+        success: false,
+        error: "Email already exists" 
+      });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -26,17 +55,50 @@ export const signup = async (req, res) => {
     });
 
     await newUser.save();
+    
+    // Generate token and set cookie
     generateToken(newUser._id, res);
 
-    res.status(201).json({
+    // Prepare user response without sensitive information
+    const userResponse = {
       _id: newUser._id,
       fullName: newUser.fullName,
       email: newUser.email,
-      profilePic: newUser.profilePic,
+      profilePic: newUser.profilePic || ''
+    };
+
+    // Send successful response
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      user: userResponse
     });
   } catch (error) {
     console.error("Error in signup controller:", error);
-    res.status(500).json({ error: "Internal server error" });
+    
+    // Differentiate between different types of errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        success: false,
+        error: "Validation failed",
+        details: error.errors 
+      });
+    }
+
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        success: false,
+        error: "Duplicate key error",
+        details: "A user with this email already exists" 
+      });
+    }
+
+    // Generic server error
+    res.status(500).json({ 
+      success: false,
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? error.message : null
+    });
   }
 };
 

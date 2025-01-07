@@ -34,8 +34,8 @@ export const useAuthStore = create((set, get) => ({
       // Remove /api prefix as it's now handled by axios configuration
       const res = await axiosInstance.post("/auth/signup", data);
       
-      // Check for the new response format
-      if (res.data.success) {
+      // Comprehensive check for successful signup
+      if (res.data && res.data.success) {
         const userData = res.data.user;
         
         // Store user info in localStorage for persistent cross-tab state
@@ -47,13 +47,15 @@ export const useAuthStore = create((set, get) => ({
         // Connect socket after successful signup
         get().connectSocket();
         
-        toast.success("Account created successfully");
+        // Show success toast with user's name
+        toast.success(`Welcome, ${userData.fullName}! Account created successfully`);
         
         return userData;
       } else {
-        // Fallback for unexpected response format
-        toast.error("Signup failed: Unexpected response");
-        throw new Error("Signup failed");
+        // Handle unexpected response format
+        const errorMessage = res.data?.error || res.data?.message || "Signup failed: Unexpected response";
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
     } catch (error) {
       // More detailed error handling
@@ -62,7 +64,7 @@ export const useAuthStore = create((set, get) => ({
         
         // Use the new error response format
         if (!errorData.success) {
-          const errorMessage = errorData.error || 'Signup failed';
+          const errorMessage = errorData.error || errorData.message || 'Signup failed';
           
           // Provide more specific error messages
           switch (errorMessage) {
@@ -81,6 +83,12 @@ export const useAuthStore = create((set, get) => ({
             default:
               toast.error(errorMessage);
           }
+          
+          // Log detailed error for debugging
+          console.error('Signup Error Details:', {
+            error: errorMessage,
+            details: errorData.details
+          });
         }
       } else if (error.request) {
         // No response received
