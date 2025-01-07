@@ -1,10 +1,19 @@
 services:
   - type: web
+    name: chatty-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  - type: web
     name: chatty-backend
     env: node
-    plan: free
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    buildCommand: npm install
+    startCommand: npm start
     envVars:
       - key: MONGODB_URI
         fromDatabase:
@@ -14,16 +23,7 @@ services:
         generateValue: true
       - key: PORT
         value: 8000
-
-  - type: web
-    name: chatty-frontend
-    env: static
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    healthCheckPath: /api/health
 
 databases:
   - name: chatty-db

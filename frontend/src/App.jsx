@@ -2,13 +2,14 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 
-import SignUpPage from "./pages/SignUpPage";
-import LoginPage from "./pages/LoginPage";
-import SettingsPage from "./pages/SettingsPage";
-import ProfilePage from "./pages/ProfilePage";
+import Login from "./pages/login/Login";
+import Signup from "./pages/signup/Signup";
+import Home from "./pages/home/Home";
+import NotFound from "./pages/notfound/NotFound";
 import RoomChat from "./components/rooms/RoomChat";
 import LandingPage from "./pages/LandingPage"; 
-import HomePage from "./pages/HomePage";
+import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
@@ -21,7 +22,15 @@ const App = () => {
   const { theme } = useThemeStore();
 
   useEffect(() => {
-    checkAuth();
+    const checkAuthentication = async () => {
+      try {
+        await checkAuth();
+      } catch (error) {
+        console.error('Authentication check failed:', error);
+      }
+    };
+
+    checkAuthentication();
   }, []);
 
   if (isCheckingAuth) {
@@ -39,15 +48,15 @@ const App = () => {
         <Route path="/" element={<LandingPage />} />
         <Route 
           path="/login" 
-          element={authUser ? <Navigate to="/home" replace /> : <LoginPage />} 
+          element={authUser ? <Navigate to="/home" replace /> : <Login />} 
         />
         <Route 
           path="/signup" 
-          element={authUser ? <Navigate to="/home" replace /> : <SignUpPage />} 
+          element={authUser ? <Navigate to="/home" replace /> : <Signup />} 
         />
         <Route 
           path="/home" 
-          element={authUser ? <HomePage /> : <Navigate to="/login" replace />} 
+          element={authUser ? <Home /> : <Navigate to="/login" replace />} 
         />
         <Route 
           path="/rooms/:roomId" 
@@ -65,7 +74,7 @@ const App = () => {
           path="/chat" 
           element={authUser ? <Navigate to="/rooms/default" replace /> : <Navigate to="/login" replace />} 
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
     </div>

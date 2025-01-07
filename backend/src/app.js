@@ -8,6 +8,7 @@ import connectToMongoDB from "./db/connectToMongoDB.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import roomRoutes from "./routes/room.route.js";
+import healthRoutes from "./routes/health.route.js";
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
@@ -82,11 +83,13 @@ console.log('Registered Routes:');
 console.log('- /api/auth routes');
 console.log('- /api/messages routes');
 console.log('- /api/rooms routes');
+console.log('- /api/health routes');
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/rooms", roomRoutes);
+app.use("/api/health", healthRoutes);
 
 // Handle OPTIONS requests
 app.options('*', cors());
