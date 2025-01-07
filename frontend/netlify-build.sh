@@ -1,23 +1,38 @@
 #!/bin/bash
 
-# Print Node and npm versions
-echo "Node version:"
-node --version
+# Exit on first error
+set -e
 
-echo "npm version:"
-npm --version
+# Print system and environment information
+echo "System Information:"
+uname -a
+echo "Node version: $(node --version)"
+echo "npm version: $(npm --version)"
+echo "Current directory: $(pwd)"
 
-# Install dependencies
-npm install
+# Print environment variables
+echo "Environment Variables:"
+env | grep VITE_
 
-# Run build with verbose output
+# Install dependencies with verbose output
+echo "Installing dependencies..."
+npm install --verbose
+
+# Clear any existing build artifacts
+rm -rf dist
+
+# Run build with debug flags
+echo "Running build..."
 npm run build --verbose
 
-# Check if dist directory exists
-if [ -d "dist" ]; then
-  echo "Build successful! Dist directory created."
-  ls -l dist
-else
-  echo "ERROR: Dist directory not created!"
-  exit 1
+# Verify dist directory
+if [ ! -d "dist" ]; then
+    echo "ERROR: Build did not create 'dist' directory!"
+    exit 1
 fi
+
+# List contents of dist directory
+echo "Build artifacts:"
+ls -la dist
+
+echo "Build completed successfully!"

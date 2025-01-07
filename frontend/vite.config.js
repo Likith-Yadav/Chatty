@@ -11,6 +11,8 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -20,5 +22,9 @@ export default defineConfig({
         }
       }
     }
+  },
+  // Add this to help diagnose build issues
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', 'axios']
   }
 })
