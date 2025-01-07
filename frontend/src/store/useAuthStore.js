@@ -31,12 +31,66 @@ export const useAuthStore = create((set, get) => ({
   signup: async (data) => {
     set({ isSigningUp: true });
     try {
+      // Remove /api prefix as it's now handled by axios configuration
       const res = await axiosInstance.post("/auth/signup", data);
-      set({ authUser: res.data });
-      toast.success("Account created successfully");
-      get().connectSocket();
+      
+      // Check for the new response format
+      if (res.data.success) {
+        const userData = res.data.user;
+        
+        // Store user info in localStorage for persistent cross-tab state
+        localStorage.setItem('userInfo', JSON.stringify(userData));
+        
+        // Update auth state
+        set({ authUser: userData });
+        
+        // Connect socket after successful signup
+        get().connectSocket();
+        
+        toast.success("Account created successfully");
+        
+        return userData;
+      } else {
+        // Fallback for unexpected response format
+        toast.error("Signup failed: Unexpected response");
+        throw new Error("Signup failed");
+      }
     } catch (error) {
-      toast.error(error.response.data.message);
+      // More detailed error handling
+      if (error.response) {
+        const errorData = error.response.data;
+        
+        // Use the new error response format
+        if (!errorData.success) {
+          const errorMessage = errorData.error || 'Signup failed';
+          
+          // Provide more specific error messages
+          switch (errorMessage) {
+            case "All fields are required":
+              toast.error("Please fill in all fields");
+              break;
+            case "Invalid email format":
+              toast.error("Please enter a valid email address");
+              break;
+            case "Password must be at least 8 characters long":
+              toast.error("Password must be at least 8 characters long");
+              break;
+            case "Email already exists":
+              toast.error("An account with this email already exists");
+              break;
+            default:
+              toast.error(errorMessage);
+          }
+        }
+      } else if (error.request) {
+        // No response received
+        toast.error("No response from server. Check your network connection.");
+      } else {
+        // Error setting up the request
+        toast.error("Error preparing signup request");
+      }
+      
+      throw error;
     } finally {
       set({ isSigningUp: false });
     }
@@ -117,31 +171,6 @@ export const useAuthStore = create((set, get) => ({
         message: error.message,
         status: error.response?.status
       });
-
-      // Prevent showing internal server error for successful logins
-      if (error.response && error.response.status === 200) {
-        // This is a successful login that was incorrectly caught as an error
-        const userData = error.response.data;
-        
-        // Store user info in localStorage for persistent cross-tab state
-        localStorage.setItem('userInfo', JSON.stringify(userData));
-        
-        // Broadcast login event to other tabs
-        window.dispatchEvent(new Event('login'));
-        
-        // Update auth state
-        set({ 
-          authUser: userData,
-          isLoggingIn: false 
-        });
-        
-        // Connect socket after successful login
-        get().connectSocket();
-        
-        toast.success("Logged in successfully");
-        
-        return userData;
-      }
 
       // More specific error messages
       if (error.response) {
