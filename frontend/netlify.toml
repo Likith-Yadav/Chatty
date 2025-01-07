@@ -8,5 +8,6 @@
   publish = "dist"
 
 [context.production.environment]
-  VITE_BACKEND_URL = "https://your-backend-url.herokuapp.com"
-  VITE_SOCKET_URL = "https://your-backend-url.herokuapp.com"
+  VITE_BACKEND_URL = "https://chatty-app-gamma.vercel.app"
+  VITE_SOCKET_URL = "https://chatty-app-gamma.vercel.app"
+  VITE_PORT = "5173"
