@@ -42,9 +42,7 @@ app.use(cors({
       'http://localhost:5173',  // Vite dev server
       'http://127.0.0.1:5173',  // Alternative localhost
       'http://localhost:5001',  // Backend server
-      'http://127.0.0.1:5001',  // Alternative backend server
-      'https://chatty-app-frontend.netlify.app',  // Netlify frontend
-      'https://chatty-app.vercel.app'  // Vercel frontend (if applicable)
+      'http://127.0.0.1:5001'   // Alternative backend server
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
@@ -59,9 +57,11 @@ app.use(cors({
     'Content-Type', 
     'Authorization', 
     'Cookie', 
-    'X-Requested-With'
+    'x-requested-with', 
+    'x-access-token'
   ],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 
 // Comprehensive logging middleware
@@ -138,3 +138,5 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Server is accessible at http://localhost:${PORT}`);
 });
+
+export default app;
