@@ -42,7 +42,9 @@ app.use(cors({
       'http://localhost:5173',  // Vite dev server
       'http://127.0.0.1:5173',  // Alternative localhost
       'http://localhost:5001',  // Backend server
-      'http://127.0.0.1:5001'   // Alternative backend server
+      'http://127.0.0.1:5001',  // Alternative backend server
+      'https://chatty-app-frontend.netlify.app',  // Netlify frontend
+      'https://chatty-app.vercel.app'  // Vercel frontend (if applicable)
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
@@ -57,11 +59,9 @@ app.use(cors({
     'Content-Type', 
     'Authorization', 
     'Cookie', 
-    'x-requested-with', 
-    'x-access-token'
+    'X-Requested-With'
   ],
-  credentials: true,
-  optionsSuccessStatus: 200
+  credentials: true
 }));
 
 // Comprehensive logging middleware
