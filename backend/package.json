@@ -1,15 +1,19 @@
 {
-  "name": "backend",
+  "name": "chatty-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend for Chatty application",
   "main": "src/server.js",
+  "type": "module",
   "scripts": {
+    "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "vercel-build": "echo 'Build script for Vercel'"
+  },
+  "engines": {
+    "node": "18.x"
   },
   "keywords": [],
   "author": "",
-  "type": "module",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
