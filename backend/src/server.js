@@ -16,9 +16,29 @@ if (!MONGO_URI) {
 // Enhanced logging for MongoDB connection
 mongoose.set('debug', true);
 
+// Parse connection string to extract components
+const parseMongoURI = (uri) => {
+  const matches = uri.match(/^mongodb\+srv:\/\/([^:]+):([^@]+)@([^/]+)\/([^?]+)?/);
+  return matches ? {
+    username: matches[1],
+    password: matches[2],
+    host: matches[3],
+    database: matches[4] || 'test'
+  } : null;
+};
+
+const connectionDetails = parseMongoURI(MONGO_URI);
+if (connectionDetails) {
+  console.log(`🔐 Attempting to connect with:`);
+  console.log(`   User: ${connectionDetails.username}`);
+  console.log(`   Host: ${connectionDetails.host}`);
+  console.log(`   Database: ${connectionDetails.database}`);
+}
+
 mongoose.connect(MONGO_URI, {
-  // Explicitly set authentication options
+  // Explicitly set authentication and connection options
   authSource: 'admin',
+  ssl: true,
   retryWrites: true,
   w: 'majority'
 })
