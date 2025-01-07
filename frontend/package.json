@@ -5,10 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --debug",
+    "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "netlify:build": "npm run build"
+    "preview": "vite preview"
   },
   "dependencies": {
     "axios": "^1.7.7",

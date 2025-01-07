@@ -2,7 +2,11 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import io from 'socket.io-client';
 import { useAuthStore } from '../store/useAuthStore';
 
-const SocketContext = createContext(null);
+export const SocketContext = createContext(null);
+
+export const useSocketContext = () => {
+  return useContext(SocketContext);
+};
 
 export const SocketContextProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
@@ -11,20 +15,18 @@ export const SocketContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (authUser) {
-      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
-      const newSocket = io(socketUrl, {
+      const newSocket = io('http://localhost:5001', {
         query: {
           userId: authUser._id
         },
         withCredentials: true
       });
 
+      setSocket(newSocket);
+
+      // Handle connection events
       newSocket.on('connect', () => {
         console.log('Socket connected');
-      });
-
-      newSocket.on('disconnect', () => {
-        console.log('Socket disconnected');
       });
 
       newSocket.on('connect_error', (error) => {
@@ -34,8 +36,6 @@ export const SocketContextProvider = ({ children }) => {
       newSocket.on('getOnlineUsers', (users) => {
         setOnlineUsers(users);
       });
-
-      setSocket(newSocket);
 
       return () => {
         console.log('Cleaning up socket connection');
@@ -54,8 +54,4 @@ export const SocketContextProvider = ({ children }) => {
       {children}
     </SocketContext.Provider>
   );
-};
-
-export const useSocketContext = () => {
-  return useContext(SocketContext);
 };
