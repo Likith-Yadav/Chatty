@@ -42,7 +42,9 @@ app.use(cors({
       'http://localhost:5173',  // Vite dev server
       'http://127.0.0.1:5173',  // Alternative localhost
       'http://localhost:5001',  // Backend server
-      'http://127.0.0.1:5001'   // Alternative backend server
+      'http://127.0.0.1:5001',  // Alternative backend server
+      'https://chatty-frontend-p6tt.onrender.com', // Render frontend URL
+      'https://chatty-app.onrender.com'  // Alternative Render URL
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
