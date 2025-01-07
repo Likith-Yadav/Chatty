@@ -4,6 +4,7 @@
   status = 200
 
 [build]
+  base = "frontend"
   command = "bash netlify-build.sh"
   publish = "dist"
 
