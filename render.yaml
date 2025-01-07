@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: chatty-backend
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: MONGODB_URI
+        fromDatabase:
+          name: chatty-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 8000
+
+  - type: web
+    name: chatty-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: chatty-db
+    plan: free
+    ipAllowList: []  # Restrict as needed
