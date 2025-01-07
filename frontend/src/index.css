@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  padding-top: 64px; /* Adjust based on navbar height */
+  min-height: 100vh;
+  background-color: #f4f4f4;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animation for blob effect */
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+/* Ensure full scrollbar access for rooms sidebar */
+#root > div:nth-child(1) > div.h-screen.bg-base-200 > div > div > div > aside > div.p-4.flex.flex-col.h-full > div.flex.flex-col.space-y-2.max-h-\[calc\(100vh-200px\)\].overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--p)) transparent;
+  padding-bottom: 200px !important;
+  height: calc(100vh - 50px) !important;
+  max-height: none !important;
+  overflow-y: scroll !important;
+}
+
+#root > div:nth-child(1) > div.h-screen.bg-base-200 > div > div > div > aside > div.p-4.flex.flex-col.h-full > div.flex.flex-col.space-y-2.max-h-\[calc\(100vh-200px\)\].overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+#root > div:nth-child(1) > div.h-screen.bg-base-200 > div > div > div > aside > div.p-4.flex.flex-col.h-full > div.flex.flex-col.space-y-2.max-h-\[calc\(100vh-200px\)\].overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#root > div:nth-child(1) > div.h-screen.bg-base-200 > div > div > div > aside > div.p-4.flex.flex-col.h-full > div.flex.flex-col.space-y-2.max-h-\[calc\(100vh-200px\)\].overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--p) / 0.5);
+  border-radius: 20px;
+}
+
+#root > div:nth-child(1) > div.h-screen.bg-base-200 > div > div > div > aside > div.p-4.flex.flex-col.h-full > div.flex.flex-col.space-y-2.max-h-\[calc\(100vh-200px\)\].overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--p));
+}
