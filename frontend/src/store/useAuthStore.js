@@ -3,6 +3,8 @@ import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://chatty-backend-7v7t.onrender.com';
+
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
 export const useAuthStore = create((set, get) => ({
@@ -16,15 +18,73 @@ export const useAuthStore = create((set, get) => ({
 
   checkAuth: async () => {
     try {
-      const res = await axiosInstance.get("/auth/check");
+      // Add a small delay to simulate network conditions
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      set({ authUser: res.data });
-      get().connectSocket();
+      const res = await axiosInstance.get("/auth/check", {
+        timeout: 5000, // 5 seconds timeout
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+
+      if (res.data && res.data._id) {
+        set({ 
+          authUser: res.data,
+          isCheckingAuth: false 
+        });
+        get().connectSocket();
+        return res.data;
+      } else {
+        // If no user data, treat as unauthenticated
+        set({ 
+          authUser: null,
+          isCheckingAuth: false 
+        });
+        return null;
+      }
     } catch (error) {
-      console.log("Error in checkAuth:", error);
-      set({ authUser: null });
-    } finally {
-      set({ isCheckingAuth: false });
+      console.error("Authentication check failed:", {
+        error: error.response ? error.response.data : error.message,
+        status: error.response ? error.response.status : 'N/A'
+      });
+
+      // Detailed error handling
+      if (error.response) {
+        // Server responded with an error status
+        switch (error.response.status) {
+          case 401:
+            toast.error('Session expired. Please log in again.');
+            break;
+          case 403:
+            toast.error('Access denied. Please log in.');
+            break;
+          case 404:
+            toast.error('Authentication endpoint not found.');
+            break;
+          case 500:
+            toast.error('Server error. Please try again later.');
+            break;
+          default:
+            toast.error('Authentication failed. Please try again.');
+        }
+      } else if (error.request) {
+        // Request made but no response received
+        toast.error('No response from server. Check your network connection.');
+      } else {
+        // Something happened in setting up the request
+        toast.error('Error setting up authentication request.');
+      }
+
+      // Always set authUser to null and stop checking
+      set({ 
+        authUser: null,
+        isCheckingAuth: false 
+      });
+
+      return null;
     }
   },
 
@@ -267,21 +327,38 @@ export const useAuthStore = create((set, get) => ({
 
   connectSocket: () => {
     const { authUser } = get();
-    if (!authUser || get().socket?.connected) return;
+    if (!authUser) return;
 
-    const socket = io(BASE_URL, {
+    const socket = io(SOCKET_URL, {
       query: {
         userId: authUser._id,
       },
+      withCredentials: true,
+      transports: ['websocket', 'polling']
     });
-    socket.connect();
 
-    set({ socket: socket });
+    socket.on("connect", () => {
+      console.log('Socket connected successfully');
+      set({ socket });
+    });
+
+    socket.on("disconnect", () => {
+      console.log('Socket disconnected');
+      set({ socket: null });
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error('Socket connection error:', error);
+      toast.error('Failed to connect to real-time services');
+    });
 
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
     });
+
+    return socket;
   },
+
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
   },

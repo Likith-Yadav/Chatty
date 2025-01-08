@@ -1,23 +1,23 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore";
+import { lazy, Suspense } from 'react';
 import Navbar from "./components/Navbar";
-
-import Login from "./pages/LoginPage";
-import Signup from "./pages/SignUpPage";
-import Home from "./pages/HomePage";
-import NotFound from "./pages/notfound/NotFound";
-import RoomChat from "./components/rooms/RoomChat";
 import LandingPage from "./pages/LandingPage"; 
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
-
-import { useAuthStore } from "./store/useAuthStore";
-import { useThemeStore } from "./store/useThemeStore";
-
+import RoomChat from "./components/rooms/RoomChat";
 import { Loader } from "lucide-react";
-import { Toaster } from "react-hot-toast";
 
-const App = () => {
+// Lazy-loaded components
+const Login = lazy(() => import("./pages/LoginPage"));
+const Signup = lazy(() => import("./pages/SignUpPage"));
+const Home = lazy(() => import("./pages/HomePage"));
+const NotFound = lazy(() => import("./pages/notfound/NotFound"));
+
+function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
   const { theme } = useThemeStore();
 
@@ -42,9 +42,9 @@ const App = () => {
   }
 
   return (
-    <Router>
-      <div data-theme={theme} className="p-4 h-screen flex flex-col">
-        <Navbar />
+    <div data-theme={theme} className="p-4 h-screen flex flex-col">
+      <Navbar />
+      <Suspense fallback={<div>Loading...</div>}>
         <Routes>
           <Route 
             path="/" 
@@ -52,11 +52,11 @@ const App = () => {
           />
           <Route 
             path="/login" 
-            element={authUser ? <Navigate to="/home" /> : <Login />} 
+            element={!authUser ? <Login /> : <Navigate to="/home" replace />} 
           />
           <Route 
             path="/signup" 
-            element={authUser ? <Navigate to="/home" /> : <Signup />} 
+            element={!authUser ? <Signup /> : <Navigate to="/home" replace />} 
           />
           <Route 
             path="/home" 
@@ -80,10 +80,10 @@ const App = () => {
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <Toaster />
-      </div>
-    </Router>
+      </Suspense>
+      <Toaster />
+    </div>
   );
-};
+}
 
 export default App;

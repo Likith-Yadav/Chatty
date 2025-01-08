@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://chatty-backend-7v7t.onrender.com';
 
 export const axiosInstance = axios.create({
-  baseURL: `${BASE_URL}/api`, // Add /api prefix
+  baseURL: `${BASE_URL}/api`, 
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

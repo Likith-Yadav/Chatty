@@ -10,11 +10,14 @@ const io = new Server(server, {
     origin: [
       "http://localhost:5173", 
       "http://127.0.0.1:5173", 
-      "https://chatty-frontend-p6tt.onrender.com"
+      "https://chatty-frontend-p6tt.onrender.com",
+      "https://chatty-frontend-7qth.onrender.com"
     ],
-    credentials: true
+    credentials: true,
+    methods: ["GET", "POST"]
   },
-  pingTimeout: 60000
+  pingTimeout: 60000,
+  transports: ['websocket', 'polling']
 });
 
 // Map to store online users and their socket IDs

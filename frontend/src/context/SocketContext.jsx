@@ -1,5 +1,4 @@
 import { createContext, useState, useEffect, useContext } from 'react';
-import io from 'socket.io-client';
 import { useAuthStore } from '../store/useAuthStore';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
@@ -7,55 +6,29 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
 export const SocketContext = createContext(null);
 
 export const useSocketContext = () => {
-  return useContext(SocketContext);
+  const context = useContext(SocketContext);
+  const { socket, onlineUsers } = useAuthStore();
+  
+  return { socket, onlineUsers };
 };
 
 export const SocketContextProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
-  const [onlineUsers, setOnlineUsers] = useState([]);
-  const { authUser } = useAuthStore();
+  const { authUser, connectSocket, disconnectSocket } = useAuthStore();
 
   useEffect(() => {
     if (authUser) {
-      const newSocket = io(SOCKET_URL, {
-        query: {
-          userId: authUser._id
-        },
-        withCredentials: true
-      });
-
-      setSocket(newSocket);
-
-      // Handle connection events
-      newSocket.on('connect', () => {
-        console.log('Socket connected to:', SOCKET_URL);
-      });
-
-      newSocket.on('connect_error', (error) => {
-        console.error('Socket connection error:', {
-          url: SOCKET_URL,
-          error: error
-        });
-      });
-
-      newSocket.on('getOnlineUsers', (users) => {
-        setOnlineUsers(users);
-      });
-
+      const socket = connectSocket();
+      
       return () => {
-        console.log('Cleaning up socket connection');
-        newSocket.close();
+        if (socket) {
+          disconnectSocket();
+        }
       };
-    } else {
-      if (socket) {
-        socket.close();
-        setSocket(null);
-      }
     }
-  }, [authUser]);
+  }, [authUser, connectSocket, disconnectSocket]);
 
   return (
-    <SocketContext.Provider value={{ socket, onlineUsers }}>
+    <SocketContext.Provider value={null}>
       {children}
     </SocketContext.Provider>
   );
