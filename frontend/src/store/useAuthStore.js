@@ -3,7 +3,7 @@ import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://chatty-backend-7v7t.onrender.com';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://chatty-backend-7qth.onrender.com';
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
@@ -22,7 +22,7 @@ export const useAuthStore = create((set, get) => ({
       await new Promise(resolve => setTimeout(resolve, 500));
 
       const res = await axiosInstance.get("/auth/check", {
-        timeout: 5000, // 5 seconds timeout
+        timeout: 10000, // 10 seconds timeout
         headers: {
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
