@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 
-import Login from "./pages/login/Login";
-import Signup from "./pages/signup/Signup";
-import Home from "./pages/home/Home";
+import Login from "./pages/LoginPage";
+import Signup from "./pages/SignUpPage";
+import Home from "./pages/HomePage";
 import NotFound from "./pages/notfound/NotFound";
 import RoomChat from "./components/rooms/RoomChat";
 import LandingPage from "./pages/LandingPage"; 

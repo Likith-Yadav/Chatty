@@ -16,25 +16,6 @@ if (!MONGO_URI) {
 // Enhanced logging for MongoDB connection
 mongoose.set('debug', true);
 
-// Parse connection string to extract components
-const parseMongoURI = (uri) => {
-  const matches = uri.match(/^mongodb\+srv:\/\/([^:]+):([^@]+)@([^/]+)\/([^?]+)?/);
-  return matches ? {
-    username: matches[1],
-    password: matches[2],
-    host: matches[3],
-    database: matches[4] || 'test'
-  } : null;
-};
-
-const connectionDetails = parseMongoURI(MONGO_URI);
-if (connectionDetails) {
-  console.log(`🔐 Attempting to connect with:`);
-  console.log(`   User: ${connectionDetails.username}`);
-  console.log(`   Host: ${connectionDetails.host}`);
-  console.log(`   Database: ${connectionDetails.database}`);
-}
-
 mongoose.connect(MONGO_URI, {
   // Explicitly set authentication and connection options
   authSource: 'admin',
@@ -45,6 +26,31 @@ mongoose.connect(MONGO_URI, {
   .then(() => {
     console.log("✅ Successfully Connected to MongoDB");
     console.log(`🔗 Connection URI: ${MONGO_URI.replace(/:[^:]*@/, ':****@')}`);
+    
+    // Add global error handler
+    app.use((err, req, res, next) => {
+      console.error('Unhandled Error:', err);
+      res.status(500).json({
+        success: false,
+        message: 'An unexpected error occurred',
+        error: process.env.NODE_ENV === 'production' ? {} : err.message
+      });
+    });
+
+    // Catch-all route handler for unhandled routes
+    app.use((req, res, next) => {
+      console.warn(`UNHANDLED ROUTE: ${JSON.stringify({
+        method: req.method,
+        path: req.path,
+        headers: req.headers,
+        body: req.body
+      }, null, 2)}`);
+      res.status(404).json({
+        success: false,
+        message: 'Route not found'
+      });
+    });
+
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`🌐 Server is accessible at http://localhost:${PORT}`);
