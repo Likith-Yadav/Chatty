@@ -2,6 +2,8 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import io from 'socket.io-client';
 import { useAuthStore } from '../store/useAuthStore';
 
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
+
 export const SocketContext = createContext(null);
 
 export const useSocketContext = () => {
@@ -15,7 +17,7 @@ export const SocketContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (authUser) {
-      const newSocket = io('http://localhost:5001', {
+      const newSocket = io(SOCKET_URL, {
         query: {
           userId: authUser._id
         },
@@ -26,11 +28,14 @@ export const SocketContextProvider = ({ children }) => {
 
       // Handle connection events
       newSocket.on('connect', () => {
-        console.log('Socket connected');
+        console.log('Socket connected to:', SOCKET_URL);
       });
 
       newSocket.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
+        console.error('Socket connection error:', {
+          url: SOCKET_URL,
+          error: error
+        });
       });
 
       newSocket.on('getOnlineUsers', (users) => {

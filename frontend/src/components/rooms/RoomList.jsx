@@ -67,10 +67,29 @@ const RoomList = () => {
     try {
       setIsLoading(true);
       const data = await api.get('/rooms/user-rooms');
+      
+      // Additional validation
+      if (!Array.isArray(data)) {
+        console.error('Invalid rooms data:', data);
+        toast.error('Received invalid room data');
+        return;
+      }
+
       setRooms(data);
     } catch (error) {
-      console.error('Failed to fetch rooms:', error);
-      toast.error('Failed to load rooms');
+      console.error('Failed to fetch rooms:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+      
+      // More specific error messages
+      if (error.message.includes('Authentication')) {
+        toast.error('Please log in to view rooms');
+        navigate('/login');
+      } else {
+        toast.error('Failed to load rooms. Please try again later.');
+      }
     } finally {
       setIsLoading(false);
     }

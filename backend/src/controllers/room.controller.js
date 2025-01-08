@@ -242,72 +242,39 @@ export const sendRoomMessage = async (req, res) => {
 
 export const getUserRooms = async (req, res) => {
   try {
-    console.group('Get User Rooms Detailed Debug');
-    console.log('Request User Details:', {
-      userId: req.user?._id,
-      userEmail: req.user?.email,
-      userFullName: req.user?.fullName
+    console.log('Get User Rooms Request:', {
+      user: req.user ? req.user._id : 'No user found'
     });
 
-    // Explicitly check for authenticated user
-    if (!req.user) {
-      console.log('No user found in request');
-      return res.status(401).json({ error: "Unauthorized: Please log in" });
+    // Validate user authentication
+    if (!req.user || !req.user._id) {
+      console.log('Get User Rooms failed: Unauthorized');
+      return res.status(401).json({ error: "Authentication required" });
     }
 
-    const userId = req.user._id;
-
-    // Validate userId
-    if (!userId) {
-      console.log('Invalid user ID');
-      return res.status(400).json({ error: "Invalid user ID" });
-    }
-
-    console.log('Searching for rooms for user:', userId);
-
+    // Find rooms where the user is a member
     const rooms = await Room.find({ 
-      $or: [
-        { creator: userId },  // Rooms created by the user
-        { members: userId }   // Rooms where user is a member
-      ]
+      members: req.user._id 
     })
-    .populate({
-      path: "creator",
-      select: "fullName email profilePic _id"
-    })
-    .populate({
-      path: "members",
-      select: "fullName email profilePic _id"
-    })
-    .sort({ lastActivity: -1 });
+    .populate('creator', 'fullName email profilePic')
+    .populate('members', 'fullName email profilePic')
+    .sort({ createdAt: -1 });
 
-    console.log('Rooms Found Details:', rooms.map(room => ({
-      roomId: room._id,
-      roomName: room.name,
-      creator: room.creator?._id,
-      creatorEmail: room.creator?.email,
-      members: room.members.map(m => m._id)
-    })));
+    console.log('User Rooms Found:', {
+      count: rooms.length,
+      roomIds: rooms.map(room => room._id)
+    });
 
-    // Explicitly check if rooms exist
-    if (!rooms || rooms.length === 0) {
-      console.log('No rooms found for user');
-      return res.status(200).json([]); // Return empty array instead of throwing error
-    }
-
-    console.groupEnd();
     res.status(200).json(rooms);
   } catch (error) {
     console.error("Detailed error in getUserRooms:", {
       message: error.message,
       name: error.name,
-      stack: error.stack,
-      userId: req.user?._id
+      stack: error.stack
     });
 
-    // Send a more informative error response
     res.status(500).json({ 
-      error: "Failed to get user rooms", 
+      error: "Failed to retrieve user rooms", 
       details: error.message 
     });
   }
