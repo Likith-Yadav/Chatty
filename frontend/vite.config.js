@@ -5,6 +5,7 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -25,7 +26,7 @@ export default defineConfig({
   // Add server configuration for development
   server: {
     port: 5173,
-    strictPort: true,
+    host: true,
     // Add fallback for SPA routing
     history: {
       rewrites: [
@@ -40,6 +41,4 @@ export default defineConfig({
       }
     }
   },
-  // Ensure proper base path for deployment
-  base: '/'
 })

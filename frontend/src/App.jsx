@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 
 import Login from "./pages/LoginPage";
@@ -42,42 +42,47 @@ const App = () => {
   }
 
   return (
-    <div data-theme={theme}>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route 
-          path="/login" 
-          element={authUser ? <Navigate to="/home" replace /> : <Login />} 
-        />
-        <Route 
-          path="/signup" 
-          element={authUser ? <Navigate to="/home" replace /> : <Signup />} 
-        />
-        <Route 
-          path="/home" 
-          element={authUser ? <Home /> : <Navigate to="/login" replace />} 
-        />
-        <Route 
-          path="/rooms/:roomId" 
-          element={authUser ? <RoomChat /> : <Navigate to="/login" replace />} 
-        />
-        <Route 
-          path="/settings" 
-          element={authUser ? <SettingsPage /> : <Navigate to="/login" replace />} 
-        />
-        <Route 
-          path="/profile" 
-          element={authUser ? <ProfilePage /> : <Navigate to="/login" replace />} 
-        />
-        <Route 
-          path="/chat" 
-          element={authUser ? <Navigate to="/rooms/default" replace /> : <Navigate to="/login" replace />} 
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-    </div>
+    <Router>
+      <div data-theme={theme} className="p-4 h-screen flex flex-col">
+        <Navbar />
+        <Routes>
+          <Route 
+            path="/" 
+            element={authUser ? <Navigate to="/home" /> : <LandingPage />} 
+          />
+          <Route 
+            path="/login" 
+            element={authUser ? <Navigate to="/home" /> : <Login />} 
+          />
+          <Route 
+            path="/signup" 
+            element={authUser ? <Navigate to="/home" /> : <Signup />} 
+          />
+          <Route 
+            path="/home" 
+            element={authUser ? <Home /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/rooms/:roomId" 
+            element={authUser ? <RoomChat /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/settings" 
+            element={authUser ? <SettingsPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/profile" 
+            element={authUser ? <ProfilePage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/chat" 
+            element={authUser ? <Navigate to="/rooms/default" replace /> : <Navigate to="/login" replace />} 
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+      </div>
+    </Router>
   );
 };
 
