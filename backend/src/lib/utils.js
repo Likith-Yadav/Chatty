@@ -22,15 +22,13 @@ export const generateToken = (userId, res) => {
       }
     );
 
-    // Enhanced cookie settings for better cross-browser support
+    // Simple cookie settings for local development
     res.cookie("jwt", token, {
       maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days in milliseconds
       httpOnly: true, // Prevent client-side JS access
-      sameSite: 'None', // Required for cross-site cookies
-      secure: true, // HTTPS only
-      path: '/', // Accessible across entire domain
-      // Explicitly set domain for Render deployment
-      domain: process.env.COOKIE_DOMAIN || undefined
+      sameSite: 'Lax', 
+      secure: false, // Allow HTTP for local development
+      path: '/' // Accessible across entire domain
     });
 
     return token;
@@ -49,10 +47,9 @@ export const regenerateToken = (userId, res) => {
     // Remove existing token
     res.clearCookie('jwt', {
       httpOnly: true,
-      sameSite: 'None',
-      secure: true,
-      path: '/',
-      domain: process.env.COOKIE_DOMAIN || undefined
+      sameSite: 'Lax',
+      secure: false,
+      path: '/'
     });
 
     // Generate and set new token
@@ -71,9 +68,8 @@ export const invalidateToken = (res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
     expires: new Date(0), // Expire immediately
-    sameSite: 'None',
-    secure: true,
-    path: '/',
-    domain: process.env.COOKIE_DOMAIN || undefined
+    sameSite: 'Lax',
+    secure: false,
+    path: '/'
   });
 };

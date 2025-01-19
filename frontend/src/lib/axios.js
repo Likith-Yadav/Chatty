@@ -1,15 +1,12 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://chatty-backend-7qth.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
 
 export const axiosInstance = axios.create({
-  baseURL: `${BASE_URL}/api`, 
+  baseURL: BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-cache',
-    'Pragma': 'no-cache',
-    'Expires': '0'
   },
   timeout: 10000, // 10 seconds timeout
 });
@@ -45,6 +42,8 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
       console.error('Axios Error Response:', {
         data: error.response.data,
         status: error.response.status,
@@ -52,8 +51,10 @@ axiosInstance.interceptors.response.use(
         config: error.response.config
       });
     } else if (error.request) {
+      // The request was made but no response was received
       console.error('Axios No Response Error:', error.request);
     } else {
+      // Something happened in setting up the request that triggered an Error
       console.error('Axios Request Setup Error:', error.message);
     }
     return Promise.reject(error);

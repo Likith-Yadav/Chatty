@@ -8,7 +8,6 @@ import connectToMongoDB from "./db/connectToMongoDB.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import roomRoutes from "./routes/room.route.js";
-import healthRoutes from "./routes/health.route.js";
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
@@ -18,36 +17,7 @@ const PORT = process.env.PORT || 5001;
 // Connect to MongoDB
 connectToMongoDB();
 
-const allowedOrigins = [
-  'http://localhost:5173', 
-  'https://chatty-frontend-p6tt.onrender.com',
-  'https://chatty-frontend-7qth.onrender.com'
-];
-
 // Middlewares
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With', 
-    'Accept', 
-    'Origin', 
-    'Cache-Control', 
-    'Pragma', 
-    'Expires'
-  ],
-  credentials: true,
-  optionsSuccessStatus: 200
-}));
-
 app.use(express.json({ 
   limit: "50mb",
   verify: (req, res, buf) => {
@@ -61,6 +31,38 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// More robust CORS configuration
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:5173',  // Vite dev server
+      'http://127.0.0.1:5173',  // Alternative localhost
+      'http://localhost:5001',  // Backend server
+      'http://127.0.0.1:5001'   // Alternative backend server
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      console.error('Origin not allowed:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'Cookie', 
+    'x-requested-with', 
+    'x-access-token'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
 
 // Comprehensive logging middleware
 app.use((req, res, next) => {
@@ -78,13 +80,11 @@ console.log('Registered Routes:');
 console.log('- /api/auth routes');
 console.log('- /api/messages routes');
 console.log('- /api/rooms routes');
-console.log('- /api/health routes');
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/rooms", roomRoutes);
-app.use("/api/health", healthRoutes);
 
 // Handle OPTIONS requests
 app.options('*', cors());
