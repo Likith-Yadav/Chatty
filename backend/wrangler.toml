@@ -1,5 +1,5 @@
 name = "chatty-backend"
-main = "src/worker.js"
+main = "./dist/worker.js"
 compatibility_date = "2024-01-19"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
@@ -9,15 +9,14 @@ MONGODB_URI = ""  # You'll need to set this in Cloudflare's dashboard
 JWT_SECRET = ""   # You'll need to set this in Cloudflare's dashboard
 
 [build]
-command = "npm install"
+command = "npm install && npx webpack"
 watch_dir = "src"
+
+[site]
+bucket = "./dist"
 
 [triggers]
 crons = ["*/5 * * * *"]  # Run every 5 minutes to keep the worker alive
-
-[[rules]]
-type = "ESModule"
-globs = ["**/*.js"]
 
 [durable_objects]
 bindings = []
