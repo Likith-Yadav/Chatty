@@ -156,4 +156,30 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is accessible at http://localhost:${PORT}`);
 });
 
+import { Router } from 'itty-router';
+import { corsMiddleware } from './middleware/cors';
+import { authRoutes } from './routes/auth.route.js';
+import { messageRoutes } from './routes/message.route.js';
+import { roomRoutes } from './routes/room.route.js';
+import { usersRoutes } from './routes/users.route.js';
+
+// Create a new router
+const router = Router();
+
+// CORS middleware
+router.all('*', corsMiddleware);
+
+// Routes
+router.all('/api/auth/*', authRoutes);
+router.all('/api/messages/*', messageRoutes);
+router.all('/api/rooms/*', roomRoutes);
+router.all('/api/users/*', usersRoutes);
+
+// 404 handler
+router.all('*', () => new Response('Not Found', { status: 404 }));
+
+export const cloudflareApp = {
+  handle: request => router.handle(request)
+};
+
 export default app;
