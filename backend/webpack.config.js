@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   target: 'webworker',
   entry: './src/worker.js',
   mode: 'production',
@@ -12,5 +12,9 @@ module.exports = {
         },
       },
     ],
+  },
+  output: {
+    filename: 'worker.js',
+    path: './dist',
   },
 };
