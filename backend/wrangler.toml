@@ -6,6 +6,9 @@ compatibility_flags = ["nodejs_compat"]
 MONGODB_URI = ""  # You'll need to set this in Cloudflare's dashboard
 JWT_SECRET = ""   # You'll need to set this in Cloudflare's dashboard
 
+[pages]
+pages_build_output_dir = "public"
+
 [site]
 bucket = "./public"  # Static assets directory
 
