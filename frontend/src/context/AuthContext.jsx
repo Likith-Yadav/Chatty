@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { axiosInstance } from '../lib/axios';
 
 export const AuthContext = createContext(null);
 
@@ -14,14 +15,10 @@ export const AuthContextProvider = ({ children }) => {
   // You can add more authentication-related state and methods here
   const getUserChats = async () => {
     try {
-      const response = await fetch('/api/users/chats', {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      setUserChats(data);
+      const response = await axiosInstance.get('/users/chats');
+      setUserChats(response.data);
     } catch (error) {
-      console.error('Error fetching user chats:', error);
+      console.error('Error fetching user chats:', error.response ? error.response.data : error.message);
     }
   };
 

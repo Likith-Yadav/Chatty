@@ -84,8 +84,8 @@ const MessageInput = ({ onSendMessage, roomId }) => {
         return;
       }
 
-      // Optional: Image compression
-      const img = new Image();
+      // Correct way to create an image for compression
+      const img = document.createElement('img');
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');

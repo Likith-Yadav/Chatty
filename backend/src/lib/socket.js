@@ -8,16 +8,40 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      "http://localhost:5173", 
-      "http://127.0.0.1:5173", 
+      // Development origins
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://127.0.0.1:5173",
+      // Production Cloudflare domains
+      "https://chatty-frontend.pages.dev",
+      process.env.CLOUDFLARE_DOMAIN,
+      // Existing render domains
       "https://chatty-frontend-p6tt.onrender.com",
       "https://chatty-frontend-7qth.onrender.com"
-    ],
+    ].filter(Boolean), // Remove undefined entries
     credentials: true,
     methods: ["GET", "POST"]
   },
   pingTimeout: 60000,
-  transports: ['websocket', 'polling']
+  transports: ['websocket'],  // Prefer WebSocket for Cloudflare
+  allowUpgrades: false,       // Disable transport upgrades
+  path: '/socket.io/',        // Explicit path for Cloudflare routing
+  maxHttpBufferSize: 1e7,     // 10 MB max message size
+  // Additional Cloudflare-specific settings
+  handlePreflightRequest: (req, res) => {
+    res.writeHead(200, {
+      "Access-Control-Allow-Origin": req.headers.origin,
+      "Access-Control-Allow-Methods": "GET,POST",
+      "Access-Control-Allow-Headers": "content-type",
+      "Access-Control-Allow-Credentials": true
+    });
+    res.end();
+  }
+});
+
+// Add error handling for WebSocket connections
+io.engine.on("connection_error", (err) => {
+  console.error("Connection error:", err);
 });
 
 // Map to store online users and their socket IDs
@@ -40,7 +64,7 @@ export const getRoomMembers = (roomId) => {
 };
 
 io.on("connection", (socket) => {
-  console.log("A user connected", socket.id);
+  console.log("A user connected:", socket.id);
 
   const userId = socket.handshake.query.userId;
   if (!userId) {
@@ -51,6 +75,9 @@ io.on("connection", (socket) => {
   // Add user to online users
   userSocketMap.set(userId, socket.id);
   
+  // Notify other users that a new user has connected
+  socket.broadcast.emit("userConnected", userId);
+
   // Broadcast online users to all connected clients
   io.emit("getOnlineUsers", getOnlineUsers());
 
@@ -131,11 +158,14 @@ io.on("connection", (socket) => {
 
   // Handle disconnection
   socket.on("disconnect", () => {
-    console.log("user disconnected", socket.id);
+    console.log("User disconnected:", socket.id);
     
     if (userId) {
       userSocketMap.delete(userId);
       
+      // Notify other users that this user has disconnected
+      socket.broadcast.emit("userDisconnected", userId);
+
       // Clear typing status from all rooms
       typingUsers.forEach((users, roomId) => {
         users.delete(userId);

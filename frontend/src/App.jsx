@@ -1,36 +1,27 @@
 import React, { useEffect } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { useAuthStore } from "./store/useAuthStore";
-import { useThemeStore } from "./store/useThemeStore";
-import { lazy, Suspense } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from "./components/Navbar";
-import LandingPage from "./pages/LandingPage"; 
+
+import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import RoomChat from "./components/rooms/RoomChat";
+import LandingPage from "./pages/LandingPage"; 
+import HomePage from "./pages/HomePage";
+
+import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore";
+
 import { Loader } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 
-// Lazy-loaded components
-const Login = lazy(() => import("./pages/LoginPage"));
-const Signup = lazy(() => import("./pages/SignUpPage"));
-const Home = lazy(() => import("./pages/HomePage"));
-const NotFound = lazy(() => import("./pages/notfound/NotFound"));
-
-function App() {
+const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
   const { theme } = useThemeStore();
 
   useEffect(() => {
-    const checkAuthentication = async () => {
-      try {
-        await checkAuth();
-      } catch (error) {
-        console.error('Authentication check failed:', error);
-      }
-    };
-
-    checkAuthentication();
+    checkAuth();
   }, []);
 
   if (isCheckingAuth) {
@@ -42,48 +33,43 @@ function App() {
   }
 
   return (
-    <div data-theme={theme} className="p-4 h-screen flex flex-col">
+    <div data-theme={theme}>
       <Navbar />
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes>
-          <Route 
-            path="/" 
-            element={authUser ? <Navigate to="/home" /> : <LandingPage />} 
-          />
-          <Route 
-            path="/login" 
-            element={!authUser ? <Login /> : <Navigate to="/home" replace />} 
-          />
-          <Route 
-            path="/signup" 
-            element={!authUser ? <Signup /> : <Navigate to="/home" replace />} 
-          />
-          <Route 
-            path="/home" 
-            element={authUser ? <Home /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/rooms/:roomId" 
-            element={authUser ? <RoomChat /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/settings" 
-            element={authUser ? <SettingsPage /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/profile" 
-            element={authUser ? <ProfilePage /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/chat" 
-            element={authUser ? <Navigate to="/rooms/default" replace /> : <Navigate to="/login" replace />} 
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route 
+          path="/login" 
+          element={authUser ? <Navigate to="/home" replace /> : <LoginPage />} 
+        />
+        <Route 
+          path="/signup" 
+          element={authUser ? <Navigate to="/home" replace /> : <SignUpPage />} 
+        />
+        <Route 
+          path="/home" 
+          element={authUser ? <HomePage /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/rooms/:roomId" 
+          element={authUser ? <RoomChat /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/settings" 
+          element={authUser ? <SettingsPage /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/profile" 
+          element={authUser ? <ProfilePage /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/chat" 
+          element={authUser ? <Navigate to="/rooms/default" replace /> : <Navigate to="/login" replace />} 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
       <Toaster />
     </div>
   );
-}
+};
 
 export default App;

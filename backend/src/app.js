@@ -8,6 +8,7 @@ import connectToMongoDB from "./db/connectToMongoDB.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import roomRoutes from "./routes/room.route.js";
+import usersRoutes from "./routes/users.route.js";
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
@@ -39,29 +40,43 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
-      'http://localhost:5173',  // Vite dev server
-      'http://127.0.0.1:5173',  // Alternative localhost
-      'http://localhost:5001',  // Backend server
-      'http://127.0.0.1:5001'   // Alternative backend server
-    ];
+      // Development origins
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:5174',
+      'http://127.0.0.1:5174',
+      'http://localhost:5001',
+      'http://127.0.0.1:5001',
+      // Production Cloudflare domains
+      'https://chatty-frontend.pages.dev',
+      'https://chatty-backend.workers.dev',
+      process.env.CLOUDFLARE_DOMAIN, // Your custom domain if configured
+      // Existing render domains
+      'https://chatty-frontend-p6tt.onrender.com',
+      'https://chatty-frontend-7qth.onrender.com'
+    ].filter(Boolean); // Remove undefined entries
     
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.error('Origin not allowed:', origin);
+      console.warn(`Blocked request from unauthorized origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'Cookie', 
-    'x-requested-with', 
-    'x-access-token'
+    'Content-Type',
+    'Authorization',
+    'Cookie',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'X-Cloudflare-Worker',
+    'CF-Connecting-IP',
+    'CF-Ray'
   ],
-  credentials: true,
-  optionsSuccessStatus: 200
+  exposedHeaders: ['set-cookie']
 }));
 
 // Comprehensive logging middleware
@@ -80,11 +95,13 @@ console.log('Registered Routes:');
 console.log('- /api/auth routes');
 console.log('- /api/messages routes');
 console.log('- /api/rooms routes');
+console.log('- /api/users routes');
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/rooms", roomRoutes);
+app.use("/api/users", usersRoutes);
 
 // Handle OPTIONS requests
 app.options('*', cors());
